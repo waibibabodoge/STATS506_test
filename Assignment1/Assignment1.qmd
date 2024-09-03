@@ -1,0 +1,52 @@
+---
+title: "Assignment1"
+format: html
+editor: visual
+---
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Problem 1 Wine Data
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+## a)import data
+wine <- read.table("/Users/jiayiguo/Desktop/UMich/Fall24/STATS506/Assignment1/wine.data", sep = ",", header = TRUE)
+
+## b)check the report at the number of wines in each class
+value_counts <- table(wine$class)
+print(value_counts)
+
+## c)
+## 1.What is the correlation between alcohol content and color intensity?
+## The correlation between alcohol content and color intensity is 0.5463642
+library(ggplot2)
+ggplot(wine, aes(x=Alcohol, y=Color_intensity))+geom_point()
+cor(wine$Alcohol,wine$Color_intensity)
+## 2.Which class has the highest correlation? Which has the lowest?
+##class=1 has the highest correlation, class=2 has the lowesr correlation
+ggplot(wine, aes(x=class, y=Alcohol))+geom_point()
+cor(wine$Alcohol,wine$class)
+## 3.What is the alcohol content of the wine with the highest color intensity?
+##14.34
+max_index <- which.max(wine$Color_intensity)
+max_Alcohol_CI <- wine$Alcohol[max_index]
+print(max_Alcohol_CI)
+## 4.What percentage of wines had a higher content of proanthocyanins compare to ash?
+pro_ash<-which(wine$proanthocyanins>wine$ash)
+total_wine<-length(wine$Alcohol)
+print(total_wine)
+print(pro_ash/total_wine)
+```
+
+You can add options to executable code like this
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).

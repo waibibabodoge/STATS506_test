@@ -1,0 +1,69 @@
+---
+title: "Assignment1_JG"
+format: html
+editor: visual
+---
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+##Problem 1
+## a)import data
+wine <- read.table("/Users/jiayiguo/Desktop/UMich/Fall24/STATS506/Assignment1/wine.data", sep = ",", header = TRUE)
+
+## b)check the report at the number of wines in each class
+value_counts <- table(wine$class)
+print(value_counts)
+
+## c)
+## 1.What is the correlation between alcohol content and color intensity?
+## The correlation between alcohol content and color intensity is 0.5463642
+library(ggplot2)
+ggplot(wine, aes(x=Alcohol, y=Color_intensity))+geom_point()
+cor(wine$Alcohol,wine$Color_intensity)
+
+## 2.Which class has the highest correlation? Which has the lowest?
+##class=1 has the highest correlation, class=2 has the lowest correlation
+library(dplyr)
+correlation_class <- wine %>%
+group_by(class) %>%
+summarise(correlation = cor(Alcohol,Color_intensity))
+print(correlation_class)
+
+## 3.What is the alcohol content of the wine with the highest color intensity?
+##14.34
+max_index <- which.max(wine$Color_intensity)
+max_Alcohol_CI <- wine$Alcohol[max_index]
+print(max_Alcohol_CI)
+
+#？# 4.What percentage of wines had a higher content of proanthocyanins compare to ash?
+total_wine <- length(wine$Alcohol)
+comparison <- (wine$proanthocyanins > wine$ash)
+print(comparison)
+count_greater <- sum(comparison)
+print(count_greater)
+
+#？# d) Create a table identifying the average value of each variable, providing one row for the overall average, and one row per class with class averages. (This table does not need to be “fancy” but should clearly identify what each value represents.)
+average_values <- colMeans(wine)
+average_wine <- as.data.frame(average_values, byrow= TRUE)
+mean_wine <- wine %>%
+group_by(class) %>%
+summarise(colMeans(wine))
+print (average_wine, mean_wine)
+
+## e) Carry out a series of t-tests to examine whether the level of phenols differs across the three classes. Present the R output and interpret the results. (You may use an existing R function to carry out the t-test, or for minor extra credit, manually write your own calculation of the t-test p-values.)
+```
+
+You can add options to executable code like this
+
+```{r}
+##Problem 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
