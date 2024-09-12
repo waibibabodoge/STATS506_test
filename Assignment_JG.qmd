@@ -4,23 +4,28 @@ format: html
 editor: visual
 ---
 
-## Quarto
+## Stats 506 Homework1 JG
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+GitHub link:https://github.com/waibibabodoge/STATS506.git
 
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+## Problem1
 
 ```{r}
 ##Problem 1
+#| code-fold: true
+#| code-summary: "Show the code"
 ## a)import data
 wine <- read.table("/Users/jiayiguo/Desktop/UMich/Fall24/STATS506/Assignment1/wine.data", sep = ",", header = TRUE)
 
+```
+
+```{r}
 ## b)check the report at the number of wines in each class
 value_counts <- table(wine$class)
 print(value_counts)
+```
 
+```{r}
 ## c)
 ## 1.What is the correlation between alcohol content and color intensity?
 ## The correlation between alcohol content and color intensity is 0.5463642
@@ -28,6 +33,9 @@ library(ggplot2)
 ggplot(wine, aes(x=Alcohol, y=Color_intensity))+geom_point()
 cor(wine$Alcohol,wine$Color_intensity)
 
+```
+
+```{r}
 ## 2.Which class has the highest correlation? Which has the lowest?
 ##class=1 has the highest correlation, class=2 has the lowest correlation
 library(dplyr)
@@ -35,35 +43,213 @@ correlation_class <- wine %>%
 group_by(class) %>%
 summarise(correlation = cor(Alcohol,Color_intensity))
 print(correlation_class)
+```
 
+```{r}
 ## 3.What is the alcohol content of the wine with the highest color intensity?
 ##14.34
 max_index <- which.max(wine$Color_intensity)
 max_Alcohol_CI <- wine$Alcohol[max_index]
 print(max_Alcohol_CI)
-
-#？# 4.What percentage of wines had a higher content of proanthocyanins compare to ash?
-total_wine <- length(wine$Alcohol)
-comparison <- (wine$proanthocyanins > wine$ash)
-print(comparison)
-count_greater <- sum(comparison)
-print(count_greater)
-
-#？# d) Create a table identifying the average value of each variable, providing one row for the overall average, and one row per class with class averages. (This table does not need to be “fancy” but should clearly identify what each value represents.)
-average_values <- colMeans(wine)
-average_wine <- as.data.frame(average_values, byrow= TRUE)
-mean_wine <- wine %>%
-group_by(class) %>%
-summarise(colMeans(wine))
-print (average_wine, mean_wine)
-
-## e) Carry out a series of t-tests to examine whether the level of phenols differs across the three classes. Present the R output and interpret the results. (You may use an existing R function to carry out the t-test, or for minor extra credit, manually write your own calculation of the t-test p-values.)
 ```
 
-You can add options to executable code like this
+```{r}
+## 4.What percentage of wines had a higher content of proanthocyanins compare to ash?
+##8.426966%
+greater<-(wine$Proanthocyanins>wine$Ash)
+percent_pa<-(sum(greater)/length(wine$Alcohol))*100
+print(percent_pa)
+```
+
+```{r}
+#d) Create a table identifying the average value of each variable, providing one row for the overall average, and one row per class with class averages. (This table does not need to be “fancy” but should clearly identify what each value represents.)
+library(dplyr)
+avg_values <- colMeans(wine)
+grouped_avg <- wine %>%
+  group_by(class) %>%
+  summarise(across(everything(), mean))
+combined_avg <- rbind(
+  avg_values,
+  grouped_avg
+)
+print (combined_avg)
+```
+
+```{r}
+# e) Carry out a series of t-tests to examine whether the level of phenols differs across the three classes. Present the R output and interpret the results. (You may use an existing R function to carry out the t-test, or for minor extra credit, manually write your own calculation of the t-test p-values.)
+#The t test based on the Total_phenols conducted by class in 3 groups. Between group of class 1 and 2, the p value= 1.889e-11<0.05, means the relationship is statistically significant and reject the null hypothesis. Between group of class 2 and 3, the p value= 1.622e-10<0.05, means the relationship is statistically significant and reject the null hypothesis. Between group of class 3 and 1, the p value= 2.2e-16<0.05, means the relationship is statistically significant and reject the null hypothesis. All in all, three groups all suggesting significant relationship between class of Total_phenols, means the level of phenols differs across the three classe.
+test_c1c2 <- t.test(Total_phenols ~ class, data = wine[wine$class %in% c('1','2'), ])
+test_c2c3 <- t.test(Total_phenols ~ class, data = wine[wine$class %in% c('2','3'), ])
+test_c3c1 <- t.test(Total_phenols ~ class, data = wine[wine$class %in% c('3','1'), ])
+print("t test resrults:")
+print(test_c1c2)
+print(test_c2c3)
+print(test_c3c1)
+```
+
+## Problem2
 
 ```{r}
 ##Problem 2
+##a)Import the data into a data.frame in R. As with the wine data, you may download the data outside of your submission, but importation should take place inside the problem set submission.
+manager <- read.table("/Users/jiayiguo/Desktop/UMich/Fall24/STATS506/Assignment1/AskAManager.csv", sep = ",", header = TRUE)
+
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+```{r}
+##b)Clean up the variable names. Simplify them.
+library(dplyr)
+manager <- manager %>%
+  rename(age = How.old.are.you.,workspot = What.industry.do.you.work.in.,job = Job.title, job_context = If.your.job.title.needs.additional.context..please.clarify.here., annual_salary = What.is.your.annual.salary...You.ll.indicate.the.currency.in.a.later.question..If.you.are.part.time.or.hourly..please.enter.an.annualized.equivalent....what.you.would.earn.if.you.worked.the.job.40.hours.a.week..52.weeks.a.year..,additional_money = How.much.additional.monetary.compensation.do.you.get..if.any..for.example..bonuses.or.overtime.in.an.average.year...Please.only.include.monetary.compensation.here..not.the.value.of.benefits.,currency = Please.indicate.the.currency, other_currency = If..Other...please.indicate.the.currency.here.., income_context = If.your.income.needs.additional.context..please.provide.it.here., country = What.country.do.you.work.in., state = If.you.re.in.the.U.S...what.state.do.you.work.in., city = What.city.do.you.work.in., years_overall = How.many.years.of.professional.work.experience.do.you.have.overall., years_professional = How.many.years.of.professional.work.experience.do.you.have.in.your.field., education = What.is.your.highest.level.of.education.completed., gender = What.is.your.gender., race = What.is.your.race...Choose.all.that.apply..)
+```
+
+```{r}
+##c)Restrict the data to those being paid in US dollars (USD). Show that it worked by confirming the number of observations before and after restricting the data.
+# number before: 28062
+# number after: 23374
+num_all <- nrow(manager)
+manager_usd <- manager %>% 
+  filter(currency == 'USD')
+num_usd <- nrow(manager_usd)
+print(num_all)
+print(num_usd)
+```
+
+```{r}
+##d)Assume no one starts working before age 18. Eliminate any rows for which their age, years of experience in their field, and years of experience total are impossible. Again, confirm the number of observations. (Hint: Making these variables factor may make your life easier.)
+#After elimination, the sample size is 23116
+#'Use the function to convert the form of age and expereience years. The inputs are types of string of age, years_overall and years_professional, where years_overall and years_professional has the same conversion function since they are same with the catagory types, the output are type of numeric vector. Benefiting for the following comparing process.
+
+#'@param x character string representing age range
+#'@return numeric vector of age converted from the string
+library(dplyr)
+
+# Create new column based on the condition of age, year of professional, year overall
+ manager_usd <- manager_usd %>%
+  mutate(age_max = case_when(
+    age == "18-24" ~ 24,
+    age == "25-34" ~ 34,
+    age == "35-44" ~ 44,
+    age == "45-54" ~ 54,
+    age == "55-64" ~ 64,
+    age == "65 or over" ~ 100,
+    TRUE ~ NA_real_  # default case
+  ))
+  manager_usd <- manager_usd %>%
+   mutate(prof_min = case_when(
+    years_professional == "1 year or less" ~ 0,
+    years_professional == "2 - 4 years" ~ 2,
+    years_professional == "5-7 years" ~ 5,
+    years_professional == "8 - 10 years" ~ 8,
+    years_professional == "11 - 20 years" ~ 11,
+    years_professional == "21 - 30 years" ~ 21,
+    years_professional == "31 - 40 years" ~ 31,
+    years_professional == "41 years or more" ~ 41,
+    TRUE ~ NA_real_  # default case
+  ))
+  manager_usd <- manager_usd %>%
+   mutate(all_min = case_when(
+    years_overall == "1 year or less" ~ 0,
+    years_overall == "2 - 4 years" ~ 2,
+    years_overall == "5-7 years" ~ 5,
+    years_overall == "8 - 10 years" ~ 8,
+    years_overall == "11 - 20 years" ~ 11,
+    years_overall == "21 - 30 years" ~ 21,
+    years_overall == "31 - 40 years" ~ 31,
+    years_overall == "41 years or more" ~ 41,
+    TRUE ~ NA_real_  # default case
+  ))
+  
+#compare the the max age, keep the max age minus min experience >= 18. Overall experience minus professional experience >=0. Since all of the years in the dataset are in a time span, pick the greatest of age and lowest of experience to compare in order to make sure to include every reasonable data 
+manager_reasonable <- manager_usd %>%
+  filter(
+    (age_max - prof_min) >= 18,
+    (age_max - all_min) >= 18,
+    (all_min - prof_min) >= 0
+  )
+#print out the reasonable data
+num_age_reasonable <- nrow(manager_reasonable)
+print(num_age_reasonable)
+```
+
+```{r}
+##e)A lot of the incomes are likely false. Eliminate any rows with extremely low or extremely high salaries. I’ll leave the decision of what thresholds to use up to you; you could choose to eliminate only impossible values, or you could restrict the sample to eliminate the extreme values even if they are realistic (e.g. removing the billionaires or the folks making < $1,000 per year). You must justify your choice, along with either a cited source or an exploration the data, or some combination.Report your final sample size.
+#eliminate the annual incomes greater than 1400000 and less than 10000 according to Economic Policy Institute (EPI)'s top 1% personal income and lower 1%
+#My final sample size is 23105
+manager_income <- manager_reasonable %>%
+  filter(
+# Ensure experience does not exceed age
+    annual_salary >=10000,
+    annual_salary <=1400000
+  )
+
+num_income_reasonable <- nrow(manager_income)
+print(num_income_reasonable)
+```
+
+```{r}
+##f)(Optional) If you want to see this analysis through for no credit, answer the research question of whether there is a statistical association between education and salary, controlling for years of experience.
+```
+
+## Problem3
+
+```{r}
+##Problem3
+##a)Write function isPalindromic that checks if a given positive integer is a palindrome. Be sure to provide a reasonable error on an invalid input. Be sure to document your function (see instructions above).
+##Input: A positive integer
+##Output: A list with two elements:
+##isPalindromic: A logical value indicating if the ##input is palindromic.
+##reversed: The input with its digits reversed.
+#'@param num input number to be checked if it is palindromic
+#'@return TRUE if the input is palindromic, FALSE if it's not, stop and raise error for invalid input
+isPalindromic <- function(num) {
+  if (!is.numeric(num) | num <= 0 | num != as.integer(num)) {
+    stop("Error, invalid input.")
+  }
+  num_str <- as.character(num)
+  
+  reversed <- paste(rev(strsplit(num_str, NULL)[[1]]), collapse = "")
+  
+  if (reversed == num_str) {
+    return(TRUE)
+  } else {
+    return(FALSE)
+  }
+}
+```
+
+```{r}
+##b)Create a function nextPalindrome that finds the next palindromic number strictly greater than the input. Be sure to provide a reasonable error on an invalid input.
+##Input: A positive integer
+##Output: A vector of length 1 with the next ##palindromic number greater than the input
+#'@param num input number to be checked if it is palindromic and check for the next palindrome number
+#'@return the input num if the input is palindromic, the next palindromic number if it's not, stop and raise error for invalid input
+nextPalindrome <- function(num) {
+  if (!is.numeric(num) | num <= 0 | num != as.integer(num)) {
+    stop("Error, invalid input.")
+  }
+    
+  num_str <- as.character(num)
+  reversed <- paste(rev(strsplit(num_str, NULL)[[1]]), collapse = "")
+  
+  while(reversed != num_str){
+    num = num+1
+    num_str <- as.character(num)
+    reversed <- paste(rev(strsplit(num_str, NULL)[[1]]), collapse = "")
+  }
+  if (reversed == num_str) {
+    return(num_str)
+  }
+}
+```
+
+```{r}
+##c)
+##Use these functions to find the next palindrome for each of the following:
+##391: 393
+##9928: 9999
+##19272719: 19277291
+##109: 111
+##2: 2
+
+```
